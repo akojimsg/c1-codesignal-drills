@@ -21,6 +21,14 @@
  * nums is sorted and rotated between 1 and nums.length times
  */
 
+/*
+ * INSIGHT:
+ * In a rotated array, one half is always sorted — check which, then binary search it.
+ * The duplicate complication: when nums[l] == nums[m] == nums[r], we can't tell which
+ * half is sorted (e.g., [1,1,3,1] vs [3,1,1,1]). The only safe move is l++; r--,
+ * which degrades worst case to O(n) but is correct.
+ */
+
 class Solution {
     public boolean search(int[] nums, int target) {
         int l = 0, r = nums.length - 1;

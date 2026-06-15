@@ -1,49 +1,63 @@
 /*
- * #36 | Minimum Changes to Make K Semi-Palindromes
+ * #36 | Minimum Changes to Make K Semi-palindromes
  * https://leetcode.com/problems/minimum-changes-to-make-k-semi-palindromes/
  * Difficulty: Hard
- * Pattern: DP + Precomputed Costs (partition DP)
+ * Pattern: DP + Precomputed Cost Table
  *
- * Partition string s into exactly k non-empty substrings. Find the
- * minimum number of character changes to make each substring a
- * semi-palindrome (has a divisor d < len where every d-th subsequence
- * is a palindrome).
- *
- * Example 1:
- * Input: s = "abcac", k = 2
- * Output: 1
- *
- * Example 2:
- * Input: s = "abcdef", k = 2
- * Output: 2
+ * A semi-palindrome of divisor d: split string into d equal parts; corresponding
+ * characters in mirrored parts must match. Return minimum character changes to
+ * split s into k non-empty semi-palindromes.
  *
  * Constraints:
- * 2 <= k <= s.length <= 200
+ * 2 <= s.length <= 200
+ * 1 <= k <= s.length / 2
  * s consists of lowercase English letters
+ */
+
+/*
+ * INSIGHT:
+ * Precompute cost[i][j] = min changes to make s[i..j] a semi-palindrome (try all valid
+ * divisors d of (j-i+1) where d <= (j-i+1)/2).
+ * Then DP: dp[p][q] = min changes to partition s[0..q] into p semi-palindromes.
+ * dp[p][q] = min over all split points m of (dp[p-1][m] + cost[m+1][q]).
+ * Base: dp[1][q] = cost[0][q].
+ * This is the classic "partition into k pieces with cost" DP.
  */
 
 class Solution {
     public int minimumChanges(String s, int k) {
-        int n=s.length(), INF=1_000_000_000; int[][] cost=new int[n][n];
-        for(int l=0;l<n;l++) for(int r=l;r<n;r++) cost[l][r]=semiCost(s,l,r);
-        int[][] dp=new int[k+1][n+1]; for(int[] row:dp) Arrays.fill(row, INF); dp[0][0]=0;
-        for(int parts=1;parts<=k;parts++) for(int end=1;end<=n;end++)
-            for(int start=parts-1;start<end;start++)
-                dp[parts][end]=Math.min(dp[parts][end], dp[parts-1][start]+cost[start][end-1]);
-        return dp[k][n];
-    }
-    private int semiCost(String s,int l,int r){
-        int len=r-l+1, best=1_000_000_000;
-        for(int d=1;d<len;d++) if(len%d==0){
-            int cur=0;
-            for(int off=0;off<d;off++){
-                List<Character> arr=new ArrayList<>();
-                for(int p=l+off;p<=r;p+=d) arr.add(s.charAt(p));
-                for(int i=0,j=arr.size()-1;i<j;i++,j--)
-                    if(!arr.get(i).equals(arr.get(j))) cur++;
+        int n = s.length();
+        int[][] cost = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int len = j - i + 1;
+                int best = len;
+                for (int d = 1; d * 2 <= len; d++) {
+                    if (len % d != 0) continue;
+                    int changes = 0;
+                    for (int p = 0; p < d; p++) {
+                        int lo = i + p, hi = j - p;
+                        while (lo < hi) {
+                            if (s.charAt(lo) != s.charAt(hi)) changes++;
+                            lo += d; hi -= d;
+                        }
+                    }
+                    best = Math.min(best, changes);
+                }
+                cost[i][j] = best;
             }
-            best=Math.min(best,cur);
         }
-        return best;
+        int[][] dp = new int[k + 1][n];
+        for (int[] row : dp) Arrays.fill(row, Integer.MAX_VALUE / 2);
+        for (int q = 0; q < n; q++) dp[1][q] = cost[0][q];
+        for (int p = 2; p <= k; p++) {
+            for (int q = 2 * p - 1; q < n; q++) {
+                for (int m = 2 * (p - 1) - 1; m < q; m++) {
+                    if (dp[p-1][m] < Integer.MAX_VALUE / 2)
+                        dp[p][q] = Math.min(dp[p][q], dp[p-1][m] + cost[m+1][q]);
+                }
+            }
+        }
+        return dp[k][n-1];
     }
 }

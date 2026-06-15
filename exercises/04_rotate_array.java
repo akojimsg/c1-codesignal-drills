@@ -21,10 +21,24 @@
  * 0 <= k <= 10^5
  */
 
+/*
+ * INSIGHT:
+ * Rotating right by k equals three reversals:
+ *   [1,2,3,4,5,6,7], k=3
+ *   → reverse all     → [7,6,5,4,3,2,1]
+ *   → reverse [0,k)   → [5,6,7,4,3,2,1]
+ *   → reverse [k,n)   → [5,6,7,1,2,3,4]  ✓
+ * Reversing all places the two halves in the right slots; reversing each half
+ * un-flips their internal order. Use k %= n first — rotating by n is a no-op.
+ */
+
 class Solution {
     public void rotate(int[] nums, int k) {
-        int n = nums.length; k %= n;
-        reverse(nums, 0, n - 1); reverse(nums, 0, k - 1); reverse(nums, k, n - 1);
+        int n = nums.length;
+        k %= n;
+        reverse(nums, 0, n - 1);
+        reverse(nums, 0, k - 1);
+        reverse(nums, k, n - 1);
     }
     private void reverse(int[] a, int l, int r) {
         while (l < r) { int t = a[l]; a[l++] = a[r]; a[r--] = t; }

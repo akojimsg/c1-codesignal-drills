@@ -1,41 +1,56 @@
 /*
- * #39 | Online Majority Element in Subarray
+ * #39 | Online Majority Element In Subarray
  * https://leetcode.com/problems/online-majority-element-in-subarray/
  * Difficulty: Hard
- * Pattern: Randomized Candidate + Binary Search on positions
+ * Pattern: Boyer-Moore Majority Vote + Binary Search
  *
- * Design a structure for array arr supporting query(left, right, threshold):
- * return any element that appears at least threshold times in
- * arr[left..right], or -1 if none exists.
+ * Design a data structure that answers queries: for a given [left, right, threshold],
+ * return an element that appears at least threshold times in the subarray, or -1.
  *
  * Example:
- * Input: arr = [1,1,2,1,1], queries = [[0,4,5],[0,3,4],[2,3,2]]
- * Output: [1,1,-1]
+ * Input: ["MajorityChecker","query","query","query"]
+ *        [[arr = [1,1,2,2,1,1]], [0,5,4], [0,3,3], [2,3,2]]
+ * Output: [null,1,-1,2]
  *
  * Constraints:
  * 1 <= arr.length <= 2 * 10^4
- * 1 <= threshold <= right - left + 1
- * 2 * threshold > right - left + 1 (majority guaranteed if exists)
+ * 1 <= query threshold <= right - left + 1
+ * At most 10^4 queries
  */
 
-class MajorityChecker {
-    int[] arr; Map<Integer,List<Integer>> pos=new HashMap<>(); Random rand=new Random(1);
-    public MajorityChecker(int[] arr) {
-        this.arr=arr;
-        for(int i=0;i<arr.length;i++) pos.computeIfAbsent(arr[i],x->new ArrayList<>()).add(i);
+/*
+ * INSIGHT:
+ * Boyer-Moore on a random sample: with high probability, if a majority element exists
+ * (≥threshold occurrences in range of length L), sampling ~20 random positions will
+ * hit it. For each candidate from sampling, verify with binary search on a precomputed
+ * index list (positions where that value appears) — use lower_bound/upper_bound to
+ * count occurrences in [left,right] in O(log n). No candidate after sampling → return -1.
+ */
+
+class Solution {
+    private int[] arr;
+    private Map<Integer, List<Integer>> positions;
+    private Random rand;
+
+    public Solution(int[] arr) {
+        this.arr = arr;
+        positions = new HashMap<>();
+        rand = new Random();
+        for (int i = 0; i < arr.length; i++)
+            positions.computeIfAbsent(arr[i], k -> new ArrayList<>()).add(i);
     }
+
     public int query(int left, int right, int threshold) {
-        for(int t=0;t<20;t++){
-            int v=arr[left+rand.nextInt(right-left+1)]; List<Integer> p=pos.get(v);
-            int cnt=upper(p,right)-lower(p,left); if(cnt>=threshold) return v;
+        int len = right - left + 1;
+        for (int t = 0; t < 20; t++) {
+            int candidate = arr[left + rand.nextInt(len)];
+            List<Integer> idx = positions.getOrDefault(candidate, List.of());
+            int lo = Collections.binarySearch(idx, left);
+            if (lo < 0) lo = ~lo;
+            int hi = Collections.binarySearch(idx, right + 1);
+            if (hi < 0) hi = ~hi;
+            if (hi - lo >= threshold) return candidate;
         }
         return -1;
     }
-    private int lower(List<Integer> a,int x){
-        int l=0,r=a.size();
-        while(l<r){int m=(l+r)/2;if(a.get(m)<x)l=m+1;else r=m;}return l;
-    }
-    private int upper(List<Integer> a,int x){
-        int l=0,r=a.size();
-        while(l<r){int m=(l+r)/2;if(a.get(m)<=x)l=m+1;else r=m;}return l;}
 }

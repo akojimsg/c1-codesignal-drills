@@ -21,6 +21,14 @@
  * -10^9 <= nums[i] <= 10^9
  * Only one valid answer exists.
  */
+
+/*
+ * INSIGHT:
+ * Flip the question. Instead of "do any two elements sum to target?" ask
+ * "for each element, have I already seen its complement (target - x)?"
+ * A HashMap stores number→index so the lookup is O(1), reducing O(n²) to O(n).
+ * Record AFTER checking — this prevents using the same index twice.
+ */
 import java.util.*;
 
 class Solution {

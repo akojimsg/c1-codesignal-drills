@@ -22,11 +22,22 @@
  * 0 <= gas[i], cost[i] <= 10^4
  */
 
+/*
+ * INSIGHT:
+ * Two observations collapse this into one pass:
+ * 1. Feasibility: if total net gas >= 0, a solution must exist.
+ * 2. Start candidate: if the running tank goes negative at station i, no starting
+ *    point in [current_start..i] can work — each would arrive at i with even less fuel.
+ *    Reset start = i+1 and tank = 0. The last candidate that doesn't fail is the answer.
+ */
+
 class Solution {
     public int canCompleteCircuit(int[] gas, int[] cost) {
         int total = 0, tank = 0, start = 0;
         for (int i = 0; i < gas.length; i++) {
-            int diff = gas[i] - cost[i]; total += diff; tank += diff;
+            int diff = gas[i] - cost[i];
+            total += diff;
+            tank += diff;
             if (tank < 0) { start = i + 1; tank = 0; }
         }
         return total >= 0 ? start : -1;

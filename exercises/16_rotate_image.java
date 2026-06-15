@@ -19,12 +19,22 @@
  * 1 <= n <= 20
  */
 
+/*
+ * INSIGHT:
+ * 90° CW = transpose then reverse each row.
+ * Proof: transpose maps (i,j)→(j,i); reversing row j maps (j,i)→(j,n-1-i).
+ * The CW rule is original (i,j) → new (j, n-1-i). ✓
+ * Transpose only needs j starting at i+1 to avoid double-swapping the diagonal.
+ * Variants: CCW = reverse rows first then transpose. 180° = reverse entire matrix.
+ */
+
 class Solution {
     public void rotate(int[][] matrix) {
         int n = matrix.length;
-        for (int i = 0; i < n; i++) for (int j = i + 1; j < n; j++) {
-            int t = matrix[i][j]; matrix[i][j] = matrix[j][i]; matrix[j][i] = t;
-        }
+        for (int i = 0; i < n; i++)
+            for (int j = i + 1; j < n; j++) {
+                int t = matrix[i][j]; matrix[i][j] = matrix[j][i]; matrix[j][i] = t;
+            }
         for (int[] row : matrix) {
             int l = 0, r = n - 1;
             while (l < r) { int t = row[l]; row[l++] = row[r]; row[r--] = t; }

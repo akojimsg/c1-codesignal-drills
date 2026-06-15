@@ -2,11 +2,11 @@
  * #37 | Count Anagrams
  * https://leetcode.com/problems/count-anagrams/
  * Difficulty: Hard
- * Pattern: Math / Combinatorics (factorial with modular inverse)
+ * Pattern: Combinatorics (Permutations with Repetitions) + Modular Arithmetic
  *
- * Given a string s of words separated by spaces, for each word count
- * the number of distinct anagram arrangements. Return the product of
- * all words' counts modulo 10^9 + 7.
+ * Given a space-separated string s, for each word compute the number of
+ * distinct anagrams (arrangements of its characters), then return the
+ * product of all those counts modulo 10^9 + 7.
  *
  * Example 1:
  * Input: s = "too hot"
@@ -19,27 +19,42 @@
  * Constraints:
  * 1 <= s.length <= 10^5
  * s consists of lowercase English letters and spaces
- * s contains at least one word, no leading/trailing spaces, single spaces between words
+ * Adjacent words separated by single space, no leading/trailing spaces
+ */
+
+/*
+ * INSIGHT:
+ * Distinct arrangements of a word of length n = n! / (freq[a]! × freq[b]! × ...).
+ * Compute using precomputed factorials and modular inverses (Fermat's little theorem:
+ * inv(x) = x^(MOD-2) mod MOD). Multiply results for each word together.
+ * Precompute all factorials once (up to max length) to avoid recomputation per word.
  */
 
 class Solution {
-    static final long MOD = 1_000_000_007L;
-    public int countAnagrams(String s) {
-        String[] words = s.split(" "); int max = 0;
-        for(String w:words) max=Math.max(max,w.length());
-        long[] fact=new long[max+1], invFact=new long[max+1]; fact[0]=1;
-        for(int i=1;i<=max;i++) fact[i]=fact[i-1]*i%MOD;
-        invFact[max]=pow(fact[max],MOD-2);
-        for(int i=max;i>0;i--) invFact[i-1]=invFact[i]*i%MOD;
-        long ans=1;
-        for(String w:words){
-            int[] cnt=new int[26]; for(char c:w.toCharArray()) cnt[c-'a']++;
-            long ways=fact[w.length()]; for(int c:cnt) ways=ways*invFact[c]%MOD;
-            ans=ans*ways%MOD;
+    static final int MOD = 1_000_000_007;
+
+    public long countAnagrams(String s) {
+        int n = s.length();
+        long[] fact = new long[n + 1];
+        fact[0] = 1;
+        for (int i = 1; i <= n; i++) fact[i] = fact[i-1] * i % MOD;
+        long ans = 1;
+        for (String word : s.split(" ")) {
+            int[] cnt = new int[26];
+            for (char c : word.toCharArray()) cnt[c - 'a']++;
+            long ways = fact[word.length()];
+            for (int x : cnt) ways = ways * modPow(fact[x], MOD - 2) % MOD;
+            ans = ans * ways % MOD;
         }
-        return (int)ans;
+        return ans;
     }
-    private long pow(long a,long e){
-        long r=1; while(e>0){if((e&1)==1) r=r*a%MOD; a=a*a%MOD; e>>=1;} return r;
+    private long modPow(long base, long exp) {
+        long result = 1; base %= MOD;
+        while (exp > 0) {
+            if ((exp & 1) == 1) result = result * base % MOD;
+            base = base * base % MOD;
+            exp >>= 1;
+        }
+        return result;
     }
 }

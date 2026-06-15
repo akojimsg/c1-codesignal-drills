@@ -20,18 +20,31 @@
  * -5 * 10^4 <= nums[i] <= 5 * 10^4
  */
 
+/*
+ * INSIGHT:
+ * Use merge sort, not quicksort — LC's test cases include sorted and near-sorted inputs
+ * that trigger O(n²) worst case in naive quicksort implementations.
+ * Merge sort guarantees O(n log n). Pass a single tmp[] buffer at the top level to
+ * avoid allocating a new array on every merge call.
+ */
+
 class Solution {
     public int[] sortArray(int[] nums) {
-        mergeSort(nums, 0, nums.length - 1, new int[nums.length]); return nums;
+        mergeSort(nums, 0, nums.length - 1, new int[nums.length]);
+        return nums;
     }
     private void mergeSort(int[] a, int l, int r, int[] tmp) {
-        if (l >= r) return; int m = l + (r - l) / 2;
-        mergeSort(a, l, m, tmp); mergeSort(a, m + 1, r, tmp); merge(a, l, m, r, tmp);
+        if (l >= r) return;
+        int m = l + (r - l) / 2;
+        mergeSort(a, l, m, tmp);
+        mergeSort(a, m + 1, r, tmp);
+        merge(a, l, m, r, tmp);
     }
     private void merge(int[] a, int l, int m, int r, int[] tmp) {
         int i = l, j = m + 1, k = l;
         while (i <= m && j <= r) tmp[k++] = a[i] <= a[j] ? a[i++] : a[j++];
-        while (i <= m) tmp[k++] = a[i++]; while (j <= r) tmp[k++] = a[j++];
+        while (i <= m) tmp[k++] = a[i++];
+        while (j <= r) tmp[k++] = a[j++];
         for (i = l; i <= r; i++) a[i] = tmp[i];
     }
 }

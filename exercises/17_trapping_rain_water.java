@@ -21,6 +21,15 @@
  * 0 <= height[i] <= 10^5
  */
 
+/*
+ * INSIGHT:
+ * Water at position i = min(maxLeft, maxRight) - height[i].
+ * With two pointers we avoid precomputing both prefix arrays. The trick:
+ * if height[l] < height[r], we know the water at l is bounded by lm — because
+ * rm >= height[r] > height[l] >= lm, so min(lm, rm) = lm. We can safely compute
+ * and advance l. The symmetric argument applies for the right side.
+ */
+
 class Solution {
     public int trap(int[] height) {
         int l = 0, r = height.length - 1, lm = 0, rm = 0, ans = 0;

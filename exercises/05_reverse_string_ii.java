@@ -22,6 +22,14 @@
  * 1 <= k <= 10^4
  */
 
+/*
+ * INSIGHT:
+ * Step through the string in jumps of 2k, landing at the start of each block.
+ * Within each block, reverse only the first k characters. Math.min(i+k-1, end)
+ * collapses both edge cases (< k remaining and k–2k remaining) into one line —
+ * no separate if/else needed.
+ */
+
 class Solution {
     public String reverseStr(String s, int k) {
         char[] a = s.toCharArray();

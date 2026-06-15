@@ -21,6 +21,16 @@
  * Always possible to reach last index
  */
 
+/*
+ * INSIGHT:
+ * Think of it as implicit BFS layers. `end` is the boundary of the current layer
+ * (all positions reachable in `jumps` jumps). `far` is the farthest we can reach
+ * from any position in that layer. When i hits `end`, we've exhausted the layer:
+ * take one more jump, expand to `far`. No queue needed — the sorted structure
+ * of reachability makes the greedy expansion exact.
+ * Loop only to nums.length-2: once we've processed the last layer, the jump is already counted.
+ */
+
 class Solution {
     public int jump(int[] nums) {
         int jumps = 0, end = 0, far = 0;

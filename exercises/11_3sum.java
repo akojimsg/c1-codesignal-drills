@@ -20,16 +20,28 @@
  * -10^5 <= nums[i] <= 10^5
  */
 
+/*
+ * INSIGHT:
+ * Reduce 3Sum to 2Sum: fix one element i, then use two pointers l/r on the sorted
+ * remainder to find the complementary pair in O(n). Total: O(n²).
+ * Duplicate skipping is the tricky part:
+ *   - Skip i if same as previous → avoids triplets starting with same value.
+ *   - After a hit, skip l/r past duplicates by comparing to the element just used
+ *     (nums[l-1], nums[r+1]), not the next one.
+ */
+
 class Solution {
     public List<List<Integer>> threeSum(int[] nums) {
-        Arrays.sort(nums); List<List<Integer>> res = new ArrayList<>();
+        Arrays.sort(nums);
+        List<List<Integer>> res = new ArrayList<>();
         for (int i = 0; i < nums.length - 2; i++) {
             if (i > 0 && nums[i] == nums[i - 1]) continue;
             int l = i + 1, r = nums.length - 1;
             while (l < r) {
                 int sum = nums[i] + nums[l] + nums[r];
                 if (sum == 0) {
-                    res.add(Arrays.asList(nums[i], nums[l], nums[r])); l++; r--;
+                    res.add(Arrays.asList(nums[i], nums[l], nums[r]));
+                    l++; r--;
                     while (l < r && nums[l] == nums[l - 1]) l++;
                     while (l < r && nums[r] == nums[r + 1]) r--;
                 } else if (sum < 0) l++; else r--;

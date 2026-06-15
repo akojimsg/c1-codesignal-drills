@@ -1,38 +1,43 @@
 /*
- * #35 | Maximum Number of Non-Overlapping Palindrome Substrings
- * https://leetcode.com/problems/maximum-number-of-non-overlapping-palindrome-substrings/
- * Difficulty: Hard
- * Pattern: Greedy (earliest-ending valid palindrome)
+ * #35 | Palindromic Substrings
+ * https://leetcode.com/problems/palindromic-substrings/
+ * Difficulty: Medium
+ * Pattern: Expand Around Center
  *
- * Given a string s and integer k, return the maximum number of
- * non-overlapping palindromic substrings of length at least k.
+ * Given a string s, return the number of palindromic substrings.
+ * A string is a palindrome if it reads the same forward and backward.
  *
  * Example 1:
- * Input: s = "abaccdbbd", k = 3
- * Output: 2
+ * Input: s = "abc"
+ * Output: 3
  *
  * Example 2:
- * Input: s = "adbcda", k = 2
- * Output: 0
+ * Input: s = "aaa"
+ * Output: 6
  *
  * Constraints:
- * 1 <= k <= s.length <= 2000
+ * 1 <= s.length <= 1000
  * s consists of lowercase English letters
  */
 
+/*
+ * INSIGHT:
+ * Expand-around-center: every palindrome has a center (single char or gap between chars).
+ * For a string of length n there are 2n-1 centers. Expand outward while s[l]==s[r].
+ * Each successful expansion is a distinct palindrome — increment count each time.
+ * Simpler than DP (O(n²) both ways) and avoids building a 2D table.
+ */
+
 class Solution {
-    public int maxPalindromes(String s, int k) {
-        int ans = 0, end = -1;
-        for (int i = 0; i < s.length(); i++) {
-            if (i <= end) continue;
-            if (isPal(s, i, i + k - 1)) { ans++; end = i + k - 1; }
-            else if (isPal(s, i, i + k)) { ans++; end = i + k; }
+    public int countSubstrings(String s) {
+        int count = 0;
+        for (int center = 0; center < 2 * s.length() - 1; center++) {
+            int l = center / 2, r = l + center % 2;
+            while (l >= 0 && r < s.length() && s.charAt(l) == s.charAt(r)) {
+                count++;
+                l--; r++;
+            }
         }
-        return ans;
-    }
-    private boolean isPal(String s, int l, int r) {
-        if (r >= s.length()) return false;
-        while (l < r) if (s.charAt(l++) != s.charAt(r--)) return false;
-        return true;
+        return count;
     }
 }

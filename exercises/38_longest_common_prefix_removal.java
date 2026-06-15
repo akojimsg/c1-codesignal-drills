@@ -1,51 +1,41 @@
 /*
- * #38 | Longest Common Prefix of K Strings After Removal
- * https://leetcode.com/problems/longest-common-prefix-of-k-strings-after-removal/
- * Difficulty: Hard
- * Pattern: Trie + Prefix Counts
+ * #38 | Longest Common Prefix
+ * https://leetcode.com/problems/longest-common-prefix/
+ * Difficulty: Easy
+ * Pattern: Horizontal Scanning / Trie concept
  *
- * Given an array of strings words and integer k, for each word removed,
- * return the length of the longest common prefix shared by at least k
- * of the remaining strings.
+ * Write a function to find the longest common prefix string among an
+ * array of strings. Return "" if there is no common prefix.
  *
  * Example 1:
- * Input: words = ["jump","run","run","jump","run"], k = 2
- * Output: [3,4,4,3,4]
+ * Input: strs = ["flower","flow","flight"]
+ * Output: "fl"
+ *
+ * Example 2:
+ * Input: strs = ["dog","racecar","car"]
+ * Output: ""
  *
  * Constraints:
- * 1 <= words.length <= 10^5
- * 1 <= k <= words.length
- * 1 <= words[i].length <= 10^4
+ * 1 <= strs.length <= 200
+ * 0 <= strs[i].length <= 200
+ * strs[i] consists of lowercase English letters
+ */
+
+/*
+ * INSIGHT:
+ * Start with strs[0] as the running prefix. For each subsequent string,
+ * shrink the prefix from the right until the string starts with it.
+ * String.indexOf(prefix)==0 is the fastest "starts with" check that also
+ * handles the empty-prefix base case cleanly.
+ * Order doesn't matter — the shortest common prefix is determined by all strings equally.
  */
 
 class Solution {
-    static class Node { Node[] ch=new Node[26]; int cnt, depth; }
-    public int[] longestCommonPrefix(String[] words, int k) {
-        Node root=new Node(); List<Node> all=new ArrayList<>(); all.add(root);
-        Map<String,List<Node>> paths=new HashMap<>();
-        for(String w:words) paths.put(w, insert(root,w,all));
-        TreeMap<Integer,Integer> good=new TreeMap<>();
-        for(Node node:all) if(node.depth>0&&node.cnt>=k)
-            good.put(node.depth, good.getOrDefault(node.depth,0)+1);
-        int[] ans=new int[words.length];
-        for(int i=0;i<words.length;i++){
-            List<Node> path=paths.get(words[i]);
-            for(Node node:path) adjust(good,node,-1,k);
-            ans[i]=good.isEmpty()?0:good.lastKey();
-            for(Node node:path) adjust(good,node,1,k);
-        }
-        return ans;
-    }
-    private List<Node> insert(Node root,String w,List<Node> all){
-        List<Node> path=new ArrayList<>(); Node cur=root;
-        for(char c:w.toCharArray()){int x=c-'a';
-            if(cur.ch[x]==null){cur.ch[x]=new Node();cur.ch[x].depth=cur.depth+1;all.add(cur.ch[x]);}
-            cur=cur.ch[x]; cur.cnt++; path.add(cur);} return path;
-    }
-    private void adjust(TreeMap<Integer,Integer> good,Node node,int delta,int k){
-        if(node.cnt>=k) good.merge(node.depth,-1,Integer::sum);
-        if(good.getOrDefault(node.depth,0)<=0) good.remove(node.depth);
-        node.cnt+=delta;
-        if(node.cnt>=k) good.merge(node.depth,1,Integer::sum);
+    public String longestCommonPrefix(String[] strs) {
+        String prefix = strs[0];
+        for (int i = 1; i < strs.length; i++)
+            while (strs[i].indexOf(prefix) != 0)
+                prefix = prefix.substring(0, prefix.length() - 1);
+        return prefix;
     }
 }

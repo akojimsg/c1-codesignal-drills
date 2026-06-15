@@ -2,44 +2,58 @@
  * #32 | Text Justification
  * https://leetcode.com/problems/text-justification/
  * Difficulty: Hard
- * Pattern: Greedy Simulation (pack line, distribute spaces)
+ * Pattern: Greedy Line Packing + String Formatting
  *
- * Given an array of words and a maxWidth, format the text so each line
- * has exactly maxWidth characters and is fully justified. The last line
- * should be left-justified with single spaces between words.
+ * Given an array of words and a width maxWidth, format the text so each
+ * line has exactly maxWidth characters and is fully left-justified.
+ * Pack as many words as possible per line. Distribute extra spaces evenly
+ * (left gaps get the extra space). Last line is left-justified.
  *
- * Example 1:
- * Input: words = ["This","is","an","example","of","text","justification."],
- *        maxWidth = 16
+ * Example:
+ * Input: words = ["This","is","an","example","of","text","justification."], maxWidth = 16
  * Output: ["This    is    an", "example  of text", "justification.  "]
  *
  * Constraints:
  * 1 <= words.length <= 300
  * 1 <= words[i].length <= 20
  * 1 <= maxWidth <= 100
- * words[i].length <= maxWidth
+ */
+
+/*
+ * INSIGHT:
+ * Greedy: pack words until the next word won't fit (word count × 1 min-space + lengths > max).
+ * Then distribute spaces: gaps = words-1; each gets totalSpaces/gaps; first (totalSpaces%gaps)
+ * gaps get one extra. Edge cases: single word on line → left-pad with spaces; last line →
+ * single spaces between words, pad right. Separate the "build a line" logic cleanly.
  */
 
 class Solution {
     public List<String> fullJustify(String[] words, int maxWidth) {
-        List<String> res = new ArrayList<>(); int i = 0;
+        List<String> result = new ArrayList<>();
+        int i = 0;
         while (i < words.length) {
-            int j = i, len = 0;
-            while (j < words.length && len + words[j].length() + (j-i) <= maxWidth)
-                len += words[j++].length();
-            int gaps = j - i - 1; StringBuilder sb = new StringBuilder();
-            if (j == words.length || gaps == 0) {
-                for (int k=i;k<j;k++) { if(k>i) sb.append(' '); sb.append(words[k]); }
-                while (sb.length() < maxWidth) sb.append(' ');
-            } else {
-                int spaces = maxWidth - len, each = spaces/gaps, extra = spaces%gaps;
-                for (int k=i;k<j;k++) {
-                    sb.append(words[k]);
-                    if (k<j-1) for(int s=0;s<each+(k-i<extra?1:0);s++) sb.append(' ');
-                }
-            }
-            res.add(sb.toString()); i = j;
+            int lineLen = words[i].length(), j = i + 1;
+            while (j < words.length && lineLen + 1 + words[j].length() <= maxWidth)
+                lineLen += 1 + words[j++].length();
+            result.add(buildLine(words, i, j, lineLen, maxWidth, j == words.length));
+            i = j;
         }
-        return res;
+        return result;
+    }
+    private String buildLine(String[] words, int lo, int hi, int lineLen, int max, boolean last) {
+        int gaps = hi - lo - 1;
+        StringBuilder sb = new StringBuilder(words[lo]);
+        if (gaps == 0 || last) {
+            for (int k = lo + 1; k < hi; k++) sb.append(' ').append(words[k]);
+            while (sb.length() < max) sb.append(' ');
+        } else {
+            int totalSpaces = max - lineLen + gaps;
+            int each = totalSpaces / gaps, extra = totalSpaces % gaps;
+            for (int k = lo + 1; k < hi; k++) {
+                int sp = each + (k - lo <= extra ? 1 : 0);
+                sb.append(" ".repeat(sp)).append(words[k]);
+            }
+        }
+        return sb.toString();
     }
 }

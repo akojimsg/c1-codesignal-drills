@@ -19,6 +19,16 @@
  * 1 <= n <= 2^31 - 1
  */
 
+/*
+ * INSIGHT:
+ * The sequence either terminates at 1 (happy) or enters a cycle (not happy).
+ * A HashSet detects the cycle: seen.add(n) returns false if n was already visited.
+ * The while condition handles both exits simultaneously:
+ *   - n == 1 → found the happy end
+ *   - seen.add(n) returns false → cycle detected
+ * Then n == 1 tells us which exit was taken.
+ */
+
 class Solution {
     public boolean isHappy(int n) {
         Set<Integer> seen = new HashSet<>();

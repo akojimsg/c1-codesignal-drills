@@ -22,6 +22,14 @@
  * nums2.length == n
  */
 
+/*
+ * INSIGHT:
+ * Merge from the BACK. Front-to-back merging would overwrite nums1 elements we still need.
+ * From the back, the trailing zeros are free space — every write lands on a slot that's
+ * already been consumed or is a placeholder. When i goes negative, the remaining nums2
+ * elements fall in correctly. Remaining nums1 elements need no movement.
+ */
+
 class Solution {
     public void merge(int[] nums1, int m, int[] nums2, int n) {
         int i = m - 1, j = n - 1, k = m + n - 1;

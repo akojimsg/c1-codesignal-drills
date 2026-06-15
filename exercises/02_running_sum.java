@@ -21,6 +21,13 @@
  * -10^6 <= nums[i] <= 10^6
  */
 
+/*
+ * INSIGHT:
+ * Each element's running sum is simply the previous running sum plus the current value.
+ * We can overwrite in-place because by the time we process index i, nums[i-1] already
+ * holds the cumulative sum up to i-1 — no scratch space needed.
+ */
+
 class Solution {
     public int[] runningSum(int[] nums) {
         for (int i = 1; i < nums.length; i++) nums[i] += nums[i - 1];

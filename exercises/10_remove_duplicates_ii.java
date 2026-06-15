@@ -22,6 +22,15 @@
  * nums is sorted in non-decreasing order
  */
 
+/*
+ * INSIGHT:
+ * An element is safe to write if the write index w < 2 (not enough elements yet)
+ * OR it differs from what was written two slots ago (nums[w-2]).
+ * Checking w-2 (not w-1) is the key: if x == nums[w-2], then x already occupies
+ * positions w-2 and w-1 — a third copy would exceed the limit.
+ * Generalization: for "at most k duplicates", check x != nums[w-k].
+ */
+
 class Solution {
     public int removeDuplicates(int[] nums) {
         int w = 0;

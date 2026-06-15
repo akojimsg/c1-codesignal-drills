@@ -20,6 +20,14 @@
  * -2^31 <= nums[i] <= 2^31 - 1
  */
 
+/*
+ * INSIGHT:
+ * Two-phase compaction. Write pointer w advances only on non-zero elements,
+ * packing them to the front in their original order (phase 1). Then fill
+ * everything from w onward with zeros (phase 2). This is simpler and safer
+ * than swapping — swapping can disturb relative order of zeros.
+ */
+
 class Solution {
     public void moveZeroes(int[] nums) {
         int w = 0;

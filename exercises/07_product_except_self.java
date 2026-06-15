@@ -22,9 +22,19 @@
  * The product of any prefix or suffix fits in a 32-bit integer.
  */
 
+/*
+ * INSIGHT:
+ * product_except[i] = (product of everything LEFT of i) × (product of everything RIGHT of i).
+ * Two passes, one running accumulator each — no extra array needed beyond the output.
+ * Pass 1 (→): ans[i] = left product so far, then extend left product.
+ * Pass 2 (←): ans[i] *= right product so far, then extend right product.
+ * This avoids division and handles zeros naturally.
+ */
+
 class Solution {
     public int[] productExceptSelf(int[] nums) {
-        int n = nums.length; int[] ans = new int[n];
+        int n = nums.length;
+        int[] ans = new int[n];
         int left = 1;
         for (int i = 0; i < n; i++) { ans[i] = left; left *= nums[i]; }
         int right = 1;

@@ -21,12 +21,22 @@
  * -5 * 10^4 <= start < end <= 5 * 10^4
  */
 
+/*
+ * INSIGHT:
+ * Equivalent to finding the MAX number of non-overlapping intervals (Activity Selection),
+ * then removals = total - max_kept.
+ * Greedy rule: always keep the interval that ends earliest — it leaves the most room
+ * for future intervals. Sort by end time, greedily accept non-overlapping ones,
+ * count the rest as removals.
+ */
+
 class Solution {
     public int eraseOverlapIntervals(int[][] intervals) {
-        Arrays.sort(intervals, (a,b) -> Integer.compare(a[1], b[1]));
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[1], b[1]));
         int count = 0, end = Integer.MIN_VALUE;
         for (int[] in : intervals) {
-            if (in[0] >= end) end = in[1]; else count++;
+            if (in[0] >= end) end = in[1];
+            else count++;
         }
         return count;
     }

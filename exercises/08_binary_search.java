@@ -21,6 +21,14 @@
  * nums is sorted in ascending order
  */
 
+/*
+ * INSIGHT:
+ * Eliminate half the search space each step → O(log n).
+ * Template to memorize: l <= r (inclusive both ends), mid = l + (r-l)/2 (avoids
+ * overflow), on miss move l = m+1 or r = m-1 (never leave m in range or you loop).
+ * The loop exits when l > r, meaning the space is exhausted.
+ */
+
 class Solution {
     public int search(int[] nums, int target) {
         int l = 0, r = nums.length - 1;
