@@ -21,6 +21,7 @@
  * -10^9 <= nums[i] <= 10^9
  * Only one valid answer exists.
  */
+import java.util.*;
 
 class Solution {
     public int[] twoSum(int[] nums, int target) {
