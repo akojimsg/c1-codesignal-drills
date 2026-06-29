@@ -1,5 +1,19 @@
-const CACHE = 'dsa-drills-v1';
-const PRECACHE = ['/', '/manifest.json'];
+const CACHE = 'dsa-drills-v2';
+
+const PRECACHE = [
+  '/',
+  '/styles/base.css',
+  '/styles/nav.css',
+  '/styles/tracker.css',
+  '/styles/flashcards.css',
+  '/js/main.js',
+  '/js/state.js',
+  '/js/tracker.js',
+  '/js/flashcards.js',
+  '/problems.json',
+  '/exercise-filenames.json',
+  '/manifest.json',
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -20,19 +34,18 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Let API calls go straight to the network; fall back silently on failure
   if (url.pathname.startsWith('/api/')) {
-    e.respondWith(fetch(e.request).catch(() => new Response('null', { headers: { 'Content-Type': 'application/json' } })));
+    e.respondWith(
+      fetch(e.request).catch(() => new Response('null', { headers: { 'Content-Type': 'application/json' } }))
+    );
     return;
   }
 
-  // Network-first for the HTML so updates land immediately; cache as fallback
   if (e.request.mode === 'navigate') {
     e.respondWith(
       fetch(e.request)
         .then(res => {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
+          caches.open(CACHE).then(c => c.put(e.request, res.clone()));
           return res;
         })
         .catch(() => caches.match('/'))
@@ -40,7 +53,6 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Cache-first for everything else (manifest, icons)
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
