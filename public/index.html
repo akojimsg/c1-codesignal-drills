@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSA Drill Tracker</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DSA Drills">
+<style>
+  :root {
+    --bg: #0F1115;
+    --panel: #161922;
+    --panel-2: #1D2129;
+    --border: #2A2F3A;
+    --text: #E8E9EC;
+    --text-dim: #8B92A3;
+    --text-faint: #5C6373;
+    --red: #E5615A;
+    --red-bg: #2C1A1B;
+    --amber: #E3A857;
+    --amber-bg: #2C2418;
+    --green: #6FBE7F;
+    --green-bg: #19261C;
+    --blue: #6FA8DC;
+    --blue-bg: #18222C;
+    --mono: 'SF Mono', 'JetBrains Mono', 'Consolas', monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  h1 {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin: 2px 0 22px;
+  }
+
+  .reset-btn {
+    font-size: 11px;
+    color: var(--text-faint);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    padding: 0;
+  }
+  .reset-btn:hover { color: var(--text-dim); }
+
+  .file-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .file-btn {
+    font-size: 11px;
+    padding: 4px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text-dim);
+    cursor: pointer;
+    font-family: var(--sans);
+  }
+  .file-btn:hover { border-color: var(--text-faint); color: var(--text); }
+  .file-btn.primary {
+    background: var(--blue-bg);
+    color: var(--blue);
+    border-color: transparent;
+  }
+  .file-btn.primary:hover { border-color: var(--blue); }
+
+  .save-status {
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  .save-status.dirty { color: var(--amber); }
+  .save-status.saved { color: var(--green); }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    margin: 0 0 4px;
+  }
+
+  .stat-val {
+    font-size: 24px;
+    font-weight: 600;
+    font-family: var(--mono);
+    margin: 0;
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--panel-2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 22px;
+    display: flex;
+  }
+  .progress-seg { height: 100%; transition: width 0.3s ease; }
+
+  .filters {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-size: 12px;
+    padding: 5px 13px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text-dim);
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: all 0.12s;
+  }
+  .filter-btn:hover { border-color: var(--text-faint); }
+  .filter-btn.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+    color: var(--text-faint);
+    padding: 0 10px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr:hover { background: var(--panel); }
+  tbody tr:last-child { border-bottom: none; }
+
+  td {
+    padding: 10px;
+    vertical-align: middle;
+  }
+
+  .id-cell {
+    font-family: var(--mono);
+    color: var(--text-faint);
+    font-size: 12px;
+    width: 28px;
+  }
+
+  .name-cell {
+    font-weight: 500;
+  }
+  .name-cell a {
+    color: var(--text);
+    text-decoration: none;
+  }
+  .name-cell a:hover { text-decoration: underline; }
+
+  .pattern-cell {
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+
+  .diff-cell { font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .diff-Hard { color: var(--red); }
+  .diff-Medium { color: var(--amber); }
+  .diff-Easy { color: var(--green); }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 3px 9px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+  .badge-unknown { background: var(--red-bg); color: var(--red); }
+  .badge-familiar { background: var(--amber-bg); color: var(--amber); }
+  .badge-known { background: var(--green-bg); color: var(--green); }
+
+  .review-toggle {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .review-toggle.checked {
+    background: var(--blue);
+    border-color: var(--blue);
+  }
+  .review-toggle.checked::after {
+    content: '✓';
+    color: var(--bg);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .advance-btn {
+    font-size: 11px;
+    padding: 4px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text-dim);
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: var(--sans);
+  }
+  .advance-btn:hover { border-color: var(--text-faint); color: var(--text); }
+  .advance-btn.done {
+    background: var(--green-bg);
+    color: var(--green);
+    border-color: transparent;
+    cursor: default;
+  }
+
+  .col-review, .col-action { width: 80px; }
+  .col-diff { width: 60px; }
+  .col-stage { width: 78px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+
+  footer {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+
+  @media (max-width: 640px) {
+    .stats { grid-template-columns: repeat(3, 1fr); }
+    .pattern-cell { display: none; }
+    table { font-size: 12px; }
+    td { padding: 8px 6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>DSA Drill Tracker</h1>
+    <div class="file-controls">
+      <span class="save-status" id="save-status"></span>
+      <button class="file-btn" onclick="openFile()">Open JSON</button>
+      <button class="file-btn primary" onclick="saveFile()">Save JSON</button>
+      <button class="reset-btn" onclick="resetProgress()">Reset</button>
+    </div>
+  </header>
+  <p class="subtitle">39-problem sprint &middot; Unknown → Familiar → Known</p>
+
+  <div class="stats">
+    <div class="stat">
+      <p class="stat-label">Unknown</p>
+      <p class="stat-val" id="c-unknown" style="color:var(--red)">0</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">Familiar</p>
+      <p class="stat-val" id="c-familiar" style="color:var(--amber)">0</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">Known</p>
+      <p class="stat-val" id="c-known" style="color:var(--green)">0</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">Reviewed</p>
+      <p class="stat-val" id="c-reviewed" style="color:var(--blue)">0</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">Total</p>
+      <p class="stat-val" id="c-total">39</p>
+    </div>
+  </div>
+
+  <div class="progress-bar" id="progress-bar"></div>
+
+  <div class="filters" id="filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="unknown">Unknown</button>
+    <button class="filter-btn" data-filter="familiar">Familiar</button>
+    <button class="filter-btn" data-filter="known">Known</button>
+    <button class="filter-btn" data-filter="reviewed">Reviewed</button>
+    <button class="filter-btn" data-filter="unreviewed">Unreviewed</button>
+    <button class="filter-btn" data-filter="Hard">Hard only</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="id-cell">#</th>
+        <th>Problem</th>
+        <th class="pattern-cell">Pattern</th>
+        <th class="col-diff">Diff</th>
+        <th class="col-stage">Stage</th>
+        <th class="col-review">Reviewed</th>
+        <th class="col-action">Advance</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="empty-state" id="empty-state" style="display:none">No problems match this filter.</div>
+
+  <footer id="footer">Progress syncs to cloud automatically.</footer>
+</div>
+
+<script>
+const STAGES = ['unknown', 'familiar', 'known'];
+const STORAGE_KEY = 'dsa-drill-tracker-v1';
+const FILE_NAME = 'dsa-drill-tracker.json';
+
+let fileHandle = null;
+let isDirty = false;
+
+const DEFAULT_DATA = [
+  { id:36, name:"Min Changes to K Semi-Palindromes", slug:"minimum-changes-to-make-k-semi-palindromes", pattern:"DP + Precompute", diff:"Hard", stage:"unknown", reviewed:false },
+  { id:38, name:"Longest Common Prefix After Removal", slug:"longest-common-prefix-of-k-strings-after-removal", pattern:"Trie", diff:"Hard", stage:"unknown", reviewed:false },
+  { id:39, name:"Online Majority Element in Subarray", slug:"online-majority-element-in-subarray", pattern:"Randomized + Binary Search", diff:"Hard", stage:"unknown", reviewed:false },
+  { id:33, name:"Best Time to Buy and Sell Stock IV", slug:"best-time-to-buy-and-sell-stock-iv", pattern:"DP", diff:"Hard", stage:"unknown", reviewed:false },
+  { id:34, name:"Dungeon Game", slug:"dungeon-game", pattern:"Reverse DP", diff:"Hard", stage:"unknown", reviewed:false },
+  { id:35, name:"Max Non-Overlapping Palindrome Substrings", slug:"maximum-number-of-non-overlapping-palindrome-substrings", pattern:"Greedy", diff:"Hard", stage:"unknown", reviewed:false },
+  { id:32, name:"Text Justification", slug:"text-justification", pattern:"Greedy Simulation", diff:"Hard", stage:"unknown", reviewed:false },
+  { id:31, name:"Sudoku Solver", slug:"sudoku-solver", pattern:"Backtracking", diff:"Hard", stage:"unknown", reviewed:false },
+  { id:30, name:"Word Search II", slug:"word-search-ii", pattern:"Trie + Backtracking", diff:"Hard", stage:"unknown", reviewed:false },
+  { id:29, name:"Substring with Concatenation of All Words", slug:"substring-with-concatenation-of-all-words", pattern:"Sliding Window", diff:"Hard", stage:"unknown", reviewed:false },
+  { id:28, name:"Minimum Window Substring", slug:"minimum-window-substring", pattern:"Sliding Window", diff:"Hard", stage:"unknown", reviewed:false },
+  { id:37, name:"Count Anagrams", slug:"count-anagrams", pattern:"Math / Combinatorics", diff:"Hard", stage:"unknown", reviewed:false },
+  { id:21, name:"Jump Game II", slug:"jump-game-ii", pattern:"Greedy BFS", diff:"Medium", stage:"unknown", reviewed:false },
+  { id:18, name:"Gas Station", slug:"gas-station", pattern:"Greedy", diff:"Medium", stage:"unknown", reviewed:false },
+  { id:24, name:"Spiral Matrix III", slug:"spiral-matrix-iii", pattern:"Matrix Simulation", diff:"Medium", stage:"unknown", reviewed:false },
+  { id:26, name:"Number of Enclaves", slug:"number-of-enclaves", pattern:"DFS Boundary Fill", diff:"Medium", stage:"unknown", reviewed:false },
+  { id:13, name:"Happy Number", slug:"happy-number", pattern:"HashSet", diff:"Easy", stage:"unknown", reviewed:false },
+  { id:14, name:"Longest Consecutive Sequence", slug:"longest-consecutive-sequence", pattern:"HashSet", diff:"Medium", stage:"unknown", reviewed:false },
+  { id:10, name:"Remove Duplicates from Sorted Array II", slug:"remove-duplicates-from-sorted-array-ii", pattern:"Two Pointers", diff:"Medium", stage:"unknown", reviewed:false },
+  { id:11, name:"3Sum", slug:"3sum", pattern:"Two Pointers", diff:"Medium", stage:"unknown", reviewed:false },
+  { id:12, name:"4Sum", slug:"4sum", pattern:"Two Pointers", diff:"Medium", stage:"unknown", reviewed:false },
+  { id:15, name:"Search in Rotated Sorted Array II", slug:"search-in-rotated-sorted-array-ii", pattern:"Binary Search", diff:"Medium", stage:"unknown", reviewed:false },
+  { id:16, name:"Rotate Image", slug:"rotate-image", pattern:"Matrix", diff:"Medium", stage:"unknown", reviewed:false },
+  { id:19, name:"Insert Interval", slug:"insert-interval", pattern:"Linear Merge", diff:"Medium", stage:"unknown", reviewed:false },
+  { id:27, name:"Group Anagrams", slug:"group-anagrams", pattern:"HashMap", diff:"Medium", stage:"unknown", reviewed:false },
+  { id:3,  name:"Merge Sorted Array", slug:"merge-sorted-array", pattern:"Two Pointers", diff:"Easy", stage:"familiar", reviewed:false },
+  { id:4,  name:"Rotate Array", slug:"rotate-array", pattern:"Array Manipulation", diff:"Medium", stage:"familiar", reviewed:false },
+  { id:5,  name:"Reverse String II", slug:"reverse-string-ii", pattern:"Two Pointers", diff:"Medium", stage:"familiar", reviewed:false },
+  { id:6,  name:"Move Zeroes", slug:"move-zeroes", pattern:"Two Pointers", diff:"Easy", stage:"familiar", reviewed:false },
+  { id:22, name:"Find Median from Data Stream", slug:"find-median-from-data-stream", pattern:"Two Heaps", diff:"Hard", stage:"familiar", reviewed:false },
+  { id:25, name:"Number of Islands", slug:"number-of-islands", pattern:"DFS Flood Fill", diff:"Medium", stage:"familiar", reviewed:false },
+  { id:1,  name:"Two Sum", slug:"two-sum", pattern:"HashMap", diff:"Easy", stage:"known", reviewed:false },
+  { id:2,  name:"Running Sum of 1D Array", slug:"running-sum-of-1d-array", pattern:"Prefix Sum", diff:"Easy", stage:"known", reviewed:false },
+  { id:7,  name:"Product of Array Except Self", slug:"product-of-array-except-self", pattern:"Prefix / Suffix", diff:"Medium", stage:"known", reviewed:false },
+  { id:8,  name:"Binary Search", slug:"binary-search", pattern:"Binary Search", diff:"Easy", stage:"known", reviewed:false },
+  { id:9,  name:"Maximum Subarray", slug:"maximum-subarray", pattern:"Kadane's DP", diff:"Medium", stage:"known", reviewed:false },
+  { id:17, name:"Trapping Rain Water", slug:"trapping-rain-water", pattern:"Two Pointers", diff:"Medium", stage:"known", reviewed:false },
+  { id:20, name:"Non-Overlapping Intervals", slug:"non-overlapping-intervals", pattern:"Greedy", diff:"Medium", stage:"known", reviewed:false },
+  { id:23, name:"Sort an Array", slug:"sort-an-array", pattern:"Merge Sort", diff:"Medium", stage:"known", reviewed:false },
+];
+
+function mergeProgress(saved) {
+  return DEFAULT_DATA.map(d => {
+    const match = saved.find(s => s.id === d.id);
+    return match ? { ...d, stage: match.stage, reviewed: match.reviewed } : d;
+  });
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return structuredClone(DEFAULT_DATA);
+    return mergeProgress(JSON.parse(raw));
+  } catch (e) {
+    console.error('Failed to load saved progress', e);
+    return structuredClone(DEFAULT_DATA);
+  }
+}
+
+async function loadFromServer() {
+  try {
+    const res = await fetch('/api/state');
+    if (!res.ok) return;
+    const saved = await res.json();
+    if (!saved) return;
+    data = mergeProgress(saved);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    render();
+    setDirty(false);
+  } catch (e) {
+    console.warn('Server not available, using localStorage', e);
+  }
+}
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.error('Failed to save progress', e);
+  }
+  fetch('/api/state', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+    .then(() => setDirty(false))
+    .catch(() => setDirty(true));
+  setDirty(true);
+}
+
+function setDirty(dirty) {
+  isDirty = dirty;
+  const el = document.getElementById('save-status');
+  if (!fileHandle) {
+    el.textContent = dirty ? '● saving...' : '✓ synced';
+    el.className = 'save-status ' + (dirty ? 'dirty' : 'saved');
+  } else if (dirty) {
+    el.textContent = '● unsaved';
+    el.className = 'save-status dirty';
+  } else {
+    el.textContent = '✓ saved';
+    el.className = 'save-status saved';
+  }
+}
+
+async function writeToFile() {
+  if (!fileHandle) return;
+  try {
+    const writable = await fileHandle.createWritable();
+    await writable.write(JSON.stringify(data, null, 2));
+    await writable.close();
+    setDirty(false);
+  } catch (e) {
+    console.error('Failed to write file', e);
+  }
+}
+
+async function openFile() {
+  if (!window.showOpenFilePicker) {
+    alert('File System Access API not supported in this browser. Use Chrome or Edge.');
+    return;
+  }
+  try {
+    const [handle] = await window.showOpenFilePicker({
+      types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }],
+      multiple: false,
+    });
+    fileHandle = handle;
+    const file = await handle.getFile();
+    const text = await file.text();
+    const saved = JSON.parse(text);
+    data = mergeProgress(saved);
+    saveData();
+    setDirty(false);
+    render();
+  } catch (e) {
+    if (e.name !== 'AbortError') console.error('Failed to open file', e);
+  }
+}
+
+async function saveFile() {
+  if (!window.showSaveFilePicker) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = FILE_NAME;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    return;
+  }
+  try {
+    if (!fileHandle) {
+      fileHandle = await window.showSaveFilePicker({
+        suggestedName: FILE_NAME,
+        types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }],
+      });
+    }
+    await writeToFile();
+  } catch (e) {
+    if (e.name !== 'AbortError') console.error('Failed to save file', e);
+  }
+}
+
+let data = loadData();
+let currentFilter = 'all';
+
+function advance(id) {
+  const p = data.find(x => x.id === id);
+  const i = STAGES.indexOf(p.stage);
+  if (i < STAGES.length - 1) {
+    p.stage = STAGES[i + 1];
+    p.reviewed = true;
+  }
+  saveData();
+  render();
+}
+
+function toggleReview(id) {
+  const p = data.find(x => x.id === id);
+  p.reviewed = !p.reviewed;
+  saveData();
+  render();
+}
+
+function resetProgress() {
+  if (!confirm('Reset all progress? This clears every stage and review mark.')) return;
+  data = structuredClone(DEFAULT_DATA);
+  saveData();
+  render();
+}
+
+function diffClass(d) { return 'diff-' + d; }
+
+function render() {
+  const counts = { unknown: 0, familiar: 0, known: 0, reviewed: 0 };
+  data.forEach(p => {
+    counts[p.stage]++;
+    if (p.reviewed) counts.reviewed++;
+  });
+
+  document.getElementById('c-unknown').textContent = counts.unknown;
+  document.getElementById('c-familiar').textContent = counts.familiar;
+  document.getElementById('c-known').textContent = counts.known;
+  document.getElementById('c-reviewed').textContent = counts.reviewed;
+  document.getElementById('c-total').textContent = data.length;
+
+  const bar = document.getElementById('progress-bar');
+  const n = data.length;
+  bar.innerHTML = `
+    <div class="progress-seg" style="width:${counts.unknown/n*100}%; background:var(--red)"></div>
+    <div class="progress-seg" style="width:${counts.familiar/n*100}%; background:var(--amber)"></div>
+    <div class="progress-seg" style="width:${counts.known/n*100}%; background:var(--green)"></div>
+  `;
+
+  const filtered = data.filter(p => {
+    if (currentFilter === 'all') return true;
+    if (currentFilter === 'Hard') return p.diff === 'Hard';
+    if (currentFilter === 'reviewed') return p.reviewed;
+    if (currentFilter === 'unreviewed') return !p.reviewed;
+    return p.stage === currentFilter;
+  });
+
+  const tbody = document.getElementById('tbody');
+  const emptyState = document.getElementById('empty-state');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    emptyState.style.display = 'block';
+  } else {
+    emptyState.style.display = 'none';
+    tbody.innerHTML = filtered.map(p => `
+      <tr>
+        <td class="id-cell">${p.id}</td>
+        <td class="name-cell"><a href="https://leetcode.com/problems/${p.slug}/" target="_blank" rel="noopener">${p.name}</a></td>
+        <td class="pattern-cell">${p.pattern}</td>
+        <td class="diff-cell ${diffClass(p.diff)}">${p.diff}</td>
+        <td><span class="badge badge-${p.stage}">${p.stage}</span></td>
+        <td>
+          <button class="review-toggle ${p.reviewed ? 'checked' : ''}" onclick="toggleReview(${p.id})" aria-label="Toggle reviewed"></button>
+        </td>
+        <td>
+          ${p.stage !== 'known'
+            ? `<button class="advance-btn" onclick="advance(${p.id})">${p.stage === 'unknown' ? 'Familiar →' : 'Known →'}</button>`
+            : `<span class="badge badge-known">Known</span>`}
+        </td>
+      </tr>
+    `).join('');
+  }
+}
+
+document.getElementById('filters').addEventListener('click', (e) => {
+  if (!e.target.classList.contains('filter-btn')) return;
+  currentFilter = e.target.dataset.filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  render();
+});
+
+render();
+loadFromServer();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(console.error);
+}
+
+</script>
+
+<script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

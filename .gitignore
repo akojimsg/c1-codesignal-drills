@@ -18,3 +18,11 @@
 
 # Log files
 *.log
+
+# Node
+node_modules/
+
+# Vercel
+.vercel/
+.vercel
+.env*.local
