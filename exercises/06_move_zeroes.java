@@ -27,11 +27,22 @@
  * everything from w onward with zeros (phase 2). This is simpler and safer
  * than swapping — swapping can disturb relative order of zeros.
  */
+import java.util.*;
 
 class Solution {
     public void moveZeroes(int[] nums) {
         int w = 0;
         for (int x : nums) if (x != 0) nums[w++] = x;
         while (w < nums.length) nums[w++] = 0;
+    }
+
+    public static void main(String[] args) {
+        Solution s = new Solution();
+        int[] nums = {0,1,0,3,12};
+        s.moveZeroes(nums);
+        System.out.println("Input:  [0, 1, 0, 3, 12]");
+        System.out.println("===================================");
+        System.out.println("Expected: [1, 3, 12, 0, 0]");
+        System.out.println("Actual:   " + Arrays.toString(nums));
     }
 }

@@ -29,6 +29,7 @@
  * already been consumed or is a placeholder. When i goes negative, the remaining nums2
  * elements fall in correctly. Remaining nums1 elements need no movement.
  */
+import java.util.*;
 
 class Solution {
     public void merge(int[] nums1, int m, int[] nums2, int n) {
@@ -37,5 +38,14 @@ class Solution {
             if (i >= 0 && nums1[i] > nums2[j]) nums1[k--] = nums1[i--];
             else nums1[k--] = nums2[j--];
         }
+    }
+
+    public static void main(String[] args) {
+        Solution s = new Solution();
+        int[] nums1 = {1,2,3,0,0,0}, nums2 = {2,5,6};
+        s.merge(nums1, 3, nums2, 3);
+        //SOT Expected: [1, 2, 2, 3, 5, 6]
+        System.out.println("Expected: [1, 2, 2, 3, 5, 6]");
+        System.out.println("Actual:   " + Arrays.toString(nums1));
     }
 }
