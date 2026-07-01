@@ -42,7 +42,7 @@ export function renderTracker() {
       return `
         <tr>
           <td class="id-cell">${p.id}</td>
-          <td class="name-cell"><a href="https://leetcode.com/problems/${p.slug}/" target="_blank" rel="noopener">${p.name}</a></td>
+          <td class="name-cell"><button class="name-btn" data-id="${p.id}">${p.name}</button></td>
           <td class="pattern-cell">${p.pattern}</td>
           <td class="diff-${p.diff}">${p.diff}</td>
           <td><span class="badge badge-${stage}">${stage}</span></td>
@@ -67,6 +67,11 @@ export function initTracker() {
   });
 
   document.getElementById('tbody').addEventListener('click', e => {
+    const nameBtn = e.target.closest('.name-btn');
+    if (nameBtn) {
+      document.dispatchEvent(new CustomEvent('open-flashcard', { detail: { id: Number(nameBtn.dataset.id) } }));
+      return;
+    }
     const advBtn = e.target.closest('.advance-btn');
     if (advBtn) { advance(Number(advBtn.dataset.id)); return; }
     const revBtn = e.target.closest('.review-toggle');

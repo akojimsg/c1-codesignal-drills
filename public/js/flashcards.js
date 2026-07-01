@@ -122,20 +122,64 @@ function updateStrip(id, stage, reviewed) {
 
 // ── Navigation ─────────────────────────────────────────────────────────────
 
+let animating = false;
+
 export function flipCard() {
+  if (animating) return;
   document.getElementById('card-3d').classList.toggle('flipped');
 }
 
-export function nextCard() {
-  if (!deck.length) return;
-  fcIdx = (fcIdx + 1) % deck.length;
-  setTimeout(() => { document.getElementById('card-3d').classList.remove('flipped'); renderCard(); }, 50);
+function navigate(direction) {
+  if (animating || !deck.length) return;
+  animating = true;
+
+  const card    = document.getElementById('card-3d');
+  const outAnim = direction === 'next' ? 'animate__fadeOutLeft'  : 'animate__fadeOutRight';
+  const inAnim  = direction === 'next' ? 'animate__fadeInRight'  : 'animate__fadeInLeft';
+
+  card.classList.add('animate__animated', outAnim);
+
+  card.addEventListener('animationend', () => {
+    card.classList.remove('animate__animated', outAnim);
+    card.style.visibility = 'hidden';
+
+    fcIdx = direction === 'next'
+      ? (fcIdx + 1) % deck.length
+      : (fcIdx - 1 + deck.length) % deck.length;
+
+    card.style.transition = 'none';
+    card.classList.remove('flipped');
+    setTimeout(() => { card.style.transition = ''; }, 20);
+
+    renderCard();
+
+    card.style.visibility = 'visible';
+    card.classList.add('animate__animated', inAnim);
+
+    card.addEventListener('animationend', () => {
+      card.classList.remove('animate__animated', inAnim);
+      animating = false;
+    }, { once: true });
+
+  }, { once: true });
 }
 
-export function prevCard() {
-  if (!deck.length) return;
-  fcIdx = (fcIdx - 1 + deck.length) % deck.length;
-  setTimeout(() => { document.getElementById('card-3d').classList.remove('flipped'); renderCard(); }, 50);
+export function nextCard() { navigate('next'); }
+export function prevCard() { navigate('prev'); }
+
+export function goToCard(problemId) {
+  // Reset filter to 'all' so the problem is guaranteed in the deck
+  fcFilter = 'all';
+  document.querySelectorAll('#fc-filters .filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.fc === 'all');
+  });
+  buildDeck();
+  const idx = deck.findIndex(p => p.id === problemId);
+  if (idx !== -1) {
+    fcIdx = idx;
+    document.getElementById('card-3d').classList.remove('flipped');
+    renderCard();
+  }
 }
 
 export function shuffleDeck() {
@@ -161,7 +205,6 @@ export function initFlashcards() {
     buildDeck();
   });
 
-  document.querySelector('.scene').addEventListener('click', flipCard);
   document.getElementById('btn-prev').addEventListener('click', prevCard);
   document.getElementById('btn-next').addEventListener('click', nextCard);
   document.getElementById('btn-shuffle').addEventListener('click', shuffleDeck);
@@ -172,5 +215,55 @@ export function initFlashcards() {
 
   document.getElementById('strip-review').addEventListener('click', () => {
     if (deck.length) toggleReview(deck[fcIdx].id);
+  });
+
+  // Native touch — swipe left/right to navigate, tap to flip
+  const SWIPE_THRESHOLD = 50;
+  let touchStartX  = 0;
+  let touchStartY  = 0;
+  let touchDelta   = 0;
+  let touchAxis    = null;  // 'h' | 'v' | null (undecided)
+  let touchHandled = false; // suppress ghost click after touchend
+
+  const scene = document.getElementById('scene');
+
+  scene.addEventListener('touchstart', e => {
+    touchStartX  = e.changedTouches[0].clientX;
+    touchStartY  = e.changedTouches[0].clientY;
+    touchDelta   = 0;
+    touchAxis    = null;
+  }, { passive: true });
+
+  scene.addEventListener('touchmove', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    touchDelta = dx;
+
+    // Lock scroll axis on first significant movement
+    if (!touchAxis && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+      touchAxis = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+    }
+
+    // Only block browser scroll when confirmed horizontal swipe
+    if (touchAxis === 'h') e.preventDefault();
+  }, { passive: false });
+
+  scene.addEventListener('touchend', () => {
+    if (touchAxis === 'h' && Math.abs(touchDelta) >= SWIPE_THRESHOLD) {
+      if (touchDelta < 0) nextCard(); else prevCard();
+    } else if (!touchAxis) {
+      // Tap (no meaningful movement) — flip card
+      flipCard();
+      touchHandled = true;
+      setTimeout(() => { touchHandled = false; }, 500);
+    }
+    touchStartX = 0;
+  }, { passive: true });
+
+  // Desktop click-to-flip (suppressed after touch to avoid ghost clicks)
+  scene.addEventListener('click', e => {
+    if (touchHandled) return;
+    if (e.target.closest('a')) return; // let link clicks through
+    flipCard();
   });
 }

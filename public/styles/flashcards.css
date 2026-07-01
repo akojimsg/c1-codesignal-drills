@@ -59,6 +59,10 @@
   width: 100%;
   perspective: 1200px;
   cursor: pointer;
+  touch-action: pan-y;
+  user-select: none;
+  overflow-x: clip;  /* clips slide animations horizontally; does NOT clip vertical content */
+  border-radius: 16px;
 }
 
 .card-3d {
@@ -67,6 +71,7 @@
   transform-style: preserve-3d;
   transition: transform .55s cubic-bezier(.45,.05,.55,.95);
   border-radius: 16px;
+  --animate-duration: 0.28s;
 }
 .card-3d.flipped { transform: rotateY(180deg); }
 
@@ -87,7 +92,12 @@
   left: 0;
   transform: rotateY(180deg);
   border-left: 3px solid var(--blue);
+  pointer-events: none; /* hidden by default — front face receives clicks */
 }
+
+/* When flipped: disable front, enable back */
+.card-3d.flipped .face:not(.face-back) { pointer-events: none; }
+.card-3d.flipped .face-back            { pointer-events: auto; }
 
 /* ── Card front ───────────────────────────────────────────────────────────── */
 

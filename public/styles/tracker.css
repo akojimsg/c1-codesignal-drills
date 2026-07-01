@@ -104,8 +104,17 @@ td { padding: 10px; vertical-align: middle; }
 
 .id-cell { font-family: var(--mono); color: var(--text-faint); font-size: 12px; width: 28px; }
 .name-cell { font-weight: 500; }
-.name-cell a { color: var(--text); text-decoration: none; }
-.name-cell a:hover { text-decoration: underline; }
+.name-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+.name-btn:hover { text-decoration: underline; }
 .pattern-cell { color: var(--text-dim); font-size: 12px; }
 
 .diff-Hard   { color: var(--red);   font-size: 12px; font-weight: 500; }

@@ -1,6 +1,6 @@
 import { loadState, onProgressChange } from './state.js';
 import { initTracker, renderTracker } from './tracker.js';
-import { initFlashcards, buildDeck, flipCard, nextCard, prevCard } from './flashcards.js';
+import { initFlashcards, buildDeck, flipCard, nextCard, prevCard, goToCard } from './flashcards.js';
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 
@@ -77,6 +77,18 @@ function initReset() {
   });
 }
 
+// ── Tracker → Flashcard jump ───────────────────────────────────────────────
+
+function initOpenFlashcard() {
+  document.addEventListener('open-flashcard', e => {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('view-flashcards').classList.add('active');
+    document.querySelector('.nav-tab[data-view="flashcards"]').classList.add('active');
+    goToCard(e.detail.id);
+  });
+}
+
 // ── Render all ─────────────────────────────────────────────────────────────
 
 function renderAll() {
@@ -100,6 +112,7 @@ async function init() {
   initReset();
   initTracker();
   initFlashcards();
+  initOpenFlashcard();
 
   onProgressChange(renderAll);
 
