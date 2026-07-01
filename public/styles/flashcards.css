@@ -92,12 +92,7 @@
   left: 0;
   transform: rotateY(180deg);
   border-left: 3px solid var(--blue);
-  pointer-events: none; /* hidden by default — front face receives clicks */
 }
-
-/* When flipped: disable front, enable back */
-.card-3d.flipped .face:not(.face-back) { pointer-events: none; }
-.card-3d.flipped .face-back            { pointer-events: auto; }
 
 /* ── Card front ───────────────────────────────────────────────────────────── */
 

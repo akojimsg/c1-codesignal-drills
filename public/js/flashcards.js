@@ -85,7 +85,10 @@ export function renderCard() {
   document.getElementById('fc-counter').textContent = `${fcIdx + 1} / ${deck.length}`;
 
   updateStrip(p.id, stage, reviewed);
-  document.getElementById('card-3d').classList.remove('flipped');
+  const card3d = document.getElementById('card-3d');
+  card3d.classList.remove('flipped');
+  card3d.style.minHeight = '';
+  syncFacePointerEvents(false);
 }
 
 // ── Tracking strip ─────────────────────────────────────────────────────────
@@ -124,9 +127,27 @@ function updateStrip(id, stage, reviewed) {
 
 let animating = false;
 
+// Explicitly route pointer events — CSS backface-visibility alone is not
+// reliable across browsers for blocking pointer events on the hidden face.
+function syncFacePointerEvents(flipped) {
+  const card = document.getElementById('card-3d');
+  card.querySelector('.face:not(.face-back)').style.pointerEvents = flipped ? 'none' : '';
+  card.querySelector('.face-back').style.pointerEvents             = flipped ? ''     : 'none';
+}
+
 export function flipCard() {
   if (animating) return;
-  document.getElementById('card-3d').classList.toggle('flipped');
+  const card = document.getElementById('card-3d');
+  const isFlipped = card.classList.toggle('flipped');
+  syncFacePointerEvents(isFlipped);
+
+  if (isFlipped) {
+    // Expand card to fit back face content so links stay within hit-test bounds
+    const back = card.querySelector('.face-back');
+    card.style.minHeight = back.scrollHeight + 'px';
+  } else {
+    card.style.minHeight = '';
+  }
 }
 
 function navigate(direction) {
@@ -248,11 +269,11 @@ export function initFlashcards() {
     if (touchAxis === 'h') e.preventDefault();
   }, { passive: false });
 
-  scene.addEventListener('touchend', () => {
+  scene.addEventListener('touchend', e => {
     if (touchAxis === 'h' && Math.abs(touchDelta) >= SWIPE_THRESHOLD) {
       if (touchDelta < 0) nextCard(); else prevCard();
-    } else if (!touchAxis) {
-      // Tap (no meaningful movement) — flip card
+    } else if (!touchAxis && !e.target.closest('a')) {
+      // Tap (no movement, not on a link) — flip card
       flipCard();
       touchHandled = true;
       setTimeout(() => { touchHandled = false; }, 500);

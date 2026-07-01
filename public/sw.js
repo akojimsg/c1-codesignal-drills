@@ -1,4 +1,4 @@
-const CACHE = 'dsa-drills-v2';
+const CACHE = 'dsa-drills-v3';
 
 const PRECACHE = [
   '/',
@@ -34,6 +34,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
+  // API: network only, never cache
   if (url.pathname.startsWith('/api/')) {
     e.respondWith(
       fetch(e.request).catch(() => new Response('null', { headers: { 'Content-Type': 'application/json' } }))
@@ -41,6 +42,20 @@ self.addEventListener('fetch', e => {
     return;
   }
 
+  // JS + CSS: network-first — always fresh, cache only as offline fallback
+  if (url.pathname.match(/\.(js|css)$/)) {
+    e.respondWith(
+      fetch(e.request)
+        .then(res => {
+          caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+          return res;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // HTML navigation: network-first
   if (e.request.mode === 'navigate') {
     e.respondWith(
       fetch(e.request)
@@ -53,6 +68,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
+  // Everything else (JSON, images): cache-first
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
