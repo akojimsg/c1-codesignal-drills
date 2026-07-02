@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DSA Drills</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0F1115">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DSA Drills">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="/styles/base.css">
+  <link rel="stylesheet" href="/styles/nav.css">
+  <link rel="stylesheet" href="/styles/sidebar.css">
+  <link rel="stylesheet" href="/styles/dashboard.css">
+  <link rel="stylesheet" href="/styles/flashcards.css">
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-left">
+    <button class="sb-hamburger" id="sb-hamburger" aria-label="Open problem list">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6"  x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <div class="nav-logo">DSA Drills<span> · C1</span></div>
+    <a class="nav-gh" href="https://github.com/akojimsg/c1-codesignal-drills" target="_blank" rel="noopener" title="View on GitHub">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+      </svg>
+    </a>
+  </div>
+  <div class="nav-right">
+    <span class="sync-status" id="sync-status"></span>
+    <button class="theme-toggle" id="theme-toggle" title="Switch theme" aria-label="Switch theme"></button>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-view="dashboard">Dashboard</button>
+      <button class="nav-tab" data-view="flashcards">Flashcards</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── APP LAYOUT ───────────────────────────────────────────────────────── -->
+<div id="app-layout">
+
+  <!-- ── SIDEBAR ──────────────────────────────────────────────────────── -->
+  <aside id="sidebar">
+    <div class="sb-header">
+      <span class="sb-title">Problems</span>
+      <button class="sb-close" id="sb-close" aria-label="Close sidebar">&#10005;</button>
+    </div>
+    <div class="sb-search-wrap">
+      <input class="sb-search" id="sb-search" type="search" placeholder="Search problems…" autocomplete="off">
+    </div>
+    <div class="sb-groups" id="sb-groups"></div>
+  </aside>
+  <div class="sb-overlay" id="sb-overlay"></div>
+
+  <!-- ── MAIN PANEL ───────────────────────────────────────────────────── -->
+  <main id="main-panel">
+
+    <!-- ── DASHBOARD ────────────────────────────────────────────────── -->
+    <div class="view active" id="view-dashboard">
+
+      <!-- Stats row: 4 cards -->
+      <div class="dash-stats">
+        <div class="stat">
+          <p class="stat-label">Total</p>
+          <p class="stat-val" id="c-total">0</p>
+          <p class="stat-sub">problems</p>
+        </div>
+        <div class="stat">
+          <p class="stat-label">Known</p>
+          <p class="stat-val" id="c-known" style="color:var(--green)">0</p>
+          <p class="stat-sub" id="c-known-pct">0% of deck</p>
+          <div class="stat-bar"><div class="stat-bar-fill" id="c-known-bar" style="background:var(--green); width:0%"></div></div>
+        </div>
+        <div class="stat">
+          <p class="stat-label">Familiar</p>
+          <p class="stat-val" id="c-familiar" style="color:var(--amber)">0</p>
+          <p class="stat-sub" id="c-familiar-pct">in progress</p>
+          <div class="stat-bar"><div class="stat-bar-fill" id="c-familiar-bar" style="background:var(--amber); width:0%"></div></div>
+        </div>
+        <div class="stat">
+          <p class="stat-label">Reviewed</p>
+          <p class="stat-val" id="c-reviewed" style="color:var(--blue)">0</p>
+          <p class="stat-sub" id="c-reviewed-pct">0% reviewed</p>
+          <div class="stat-bar"><div class="stat-bar-fill" id="c-reviewed-bar" style="background:var(--blue); width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Hero: overall progress (left) + jump-in (right) -->
+      <div class="dash-hero">
+
+        <div class="dash-panel dash-overall">
+          <p class="dash-section-title">Overall Progress</p>
+          <div class="dash-overall-body">
+            <div class="dash-ring" id="dash-ring"></div>
+            <div class="dash-legend">
+              <div class="dash-legend-item">
+                <span class="dash-legend-dot" style="background:var(--green)"></span>
+                <span>Known — <strong id="leg-known">0</strong></span>
+              </div>
+              <div class="dash-legend-item">
+                <span class="dash-legend-dot" style="background:var(--amber)"></span>
+                <span>Familiar — <strong id="leg-familiar">0</strong></span>
+              </div>
+              <div class="dash-legend-item">
+                <span class="dash-legend-dot" style="background:var(--red)"></span>
+                <span>Unknown — <strong id="leg-unknown">0</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-panel dash-jumpin">
+          <p class="dash-section-title">Jump In</p>
+          <div class="dash-jumpin-btns">
+            <button class="dash-jbtn" data-deck="familiar">
+              <span class="jbtn-dot" style="background:var(--amber)"></span>
+              <span class="jbtn-label">Continue familiar</span>
+              <span class="jbtn-count"><span id="jbtn-familiar">—</span> cards →</span>
+            </button>
+            <button class="dash-jbtn" data-deck="unknown">
+              <span class="jbtn-dot" style="background:var(--red)"></span>
+              <span class="jbtn-label">Tackle unknown</span>
+              <span class="jbtn-count"><span id="jbtn-unknown">—</span> cards →</span>
+            </button>
+            <button class="dash-jbtn" data-deck="unreviewed">
+              <span class="jbtn-dot" style="background:var(--blue)"></span>
+              <span class="jbtn-label">Unreviewed only</span>
+              <span class="jbtn-count"><span id="jbtn-unreviewed">—</span> cards →</span>
+            </button>
+            <button class="dash-jbtn" data-deck="all">
+              <span class="jbtn-dot" style="background:var(--green)"></span>
+              <span class="jbtn-label">Full shuffle</span>
+              <span class="jbtn-count"><span id="jbtn-all">—</span> cards →</span>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /dash-hero -->
+
+      <!-- Bottom 2-col grid -->
+      <div class="dash-grid">
+
+        <div class="dash-panel">
+          <p class="dash-section-title">Progress by Pattern</p>
+          <div id="dash-patterns"></div>
+        </div>
+
+        <div class="dash-panel">
+          <p class="dash-section-title">Progress by Difficulty</p>
+          <div id="dash-difficulty"></div>
+          <p class="dash-section-title dash-section-title--gap">Next to Focus On</p>
+          <div id="dash-focus"></div>
+        </div>
+
+      </div><!-- /dash-grid -->
+
+      <button class="dash-reset" id="reset-btn">Reset all progress</button>
+
+    </div><!-- /view-dashboard -->
+
+    <!-- ── FLASHCARDS ────────────────────────────────────────────────── -->
+    <div class="view" id="view-flashcards">
+      <div class="fc-page">
+
+        <div class="tracking-strip">
+          <div class="strip-left">
+            <span class="strip-label">Stage</span>
+            <span class="badge badge-unknown" id="strip-badge">unknown</span>
+            <div class="strip-sep"></div>
+            <button class="strip-btn advance" id="strip-advance">Unknown → Familiar</button>
+          </div>
+          <div class="strip-right">
+            <button class="strip-btn" id="strip-review">Mark reviewed</button>
+          </div>
+        </div>
+
+        <div class="scene" id="scene">
+          <div class="card-3d" id="card-3d">
+
+            <div class="face">
+              <div class="front-inner">
+                <a class="card-num-link" id="fc-num-link" href="#" target="_blank" rel="noopener">#1</a>
+                <h2 class="card-title" id="fc-title">Loading…</h2>
+                <div class="card-meta" id="fc-meta"></div>
+                <p class="flip-hint">↻ Tap to reveal solution</p>
+              </div>
+            </div>
+
+            <div class="face face-back">
+              <div class="back-inner">
+                <div class="back-hdr">
+                  <span class="back-title" id="fc-btitle"></span>
+                  <span class="back-num"  id="fc-bnum"></span>
+                </div>
+                <div>
+                  <p class="sec-label">Problem</p>
+                  <p class="prob-text" id="fc-prob"></p>
+                </div>
+                <div class="ex-block" id="fc-ex"></div>
+                <div class="insight"  id="fc-insight"></div>
+                <div class="divider"></div>
+                <div>
+                  <p class="sec-label">Solution</p>
+                  <div class="code-block" id="fc-code"></div>
+                </div>
+                <div class="card-links">
+                  <a class="card-link" id="fc-lc-link" href="#" target="_blank" rel="noopener">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    LeetCode
+                  </a>
+                  <a class="card-link" id="fc-gh-link" href="#" target="_blank" rel="noopener">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                    Exercise
+                  </a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="controls-bar">
+          <button class="ctrl-btn" id="btn-prev">← Prev</button>
+          <span class="fc-counter" id="fc-counter">— / —</span>
+          <button class="ctrl-btn" id="btn-shuffle">Shuffle</button>
+          <button class="ctrl-btn primary" id="btn-next">Next →</button>
+        </div>
+
+      </div>
+    </div><!-- /view-flashcards -->
+
+    <footer>Progress syncs to cloud automatically.</footer>
+
+  </main><!-- /main-panel -->
+
+</div><!-- /app-layout -->
+
+<script type="module" src="/js/main.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

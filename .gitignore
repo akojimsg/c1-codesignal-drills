@@ -1,3 +1,6 @@
+# Dev container (personal config)
+.devcontainer/
+
 # Java compiled files
 *.class
 
@@ -18,3 +21,11 @@
 
 # Log files
 *.log
+
+# Node
+node_modules/
+
+# Vercel
+.vercel/
+.vercel
+.env*.local

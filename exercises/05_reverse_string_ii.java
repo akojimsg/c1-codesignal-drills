@@ -39,4 +39,17 @@ class Solution {
         }
         return new String(a);
     }
+
+    public static void main(String[] args) {
+        Solution s = new Solution();
+        System.out.println("Input:  s = \"abcdefg\", k = 2");
+        System.out.println("===================================");
+        System.out.println("Expected: \"bacdfeg\"");
+        System.out.println("Actual:   " + s.reverseStr("abcdefg", 2));
+        System.out.println("");
+        System.out.println("Input:  s = \"abcd\", k = 2");
+        System.out.println("===================================");
+        System.out.println("Expected: \"bacd\"");
+        System.out.println("Actual:   " + s.reverseStr("abcd", 2));
+    }
 }
