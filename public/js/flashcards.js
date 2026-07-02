@@ -89,6 +89,9 @@ export function renderCard() {
   card3d.classList.remove('flipped');
   card3d.style.minHeight = '';
   syncFacePointerEvents(false);
+
+  // Notify sidebar of active card
+  document.dispatchEvent(new CustomEvent('card-changed', { detail: { id: p.id } }));
 }
 
 // ── Tracking strip ─────────────────────────────────────────────────────────
@@ -191,6 +194,7 @@ export function prevCard() { navigate('prev'); }
 export function goToCard(problemId) {
   // Reset filter to 'all' so the problem is guaranteed in the deck
   fcFilter = 'all';
+  // fc-filters may not exist (replaced by sidebar) — querySelectorAll is safe
   document.querySelectorAll('#fc-filters .filter-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.fc === 'all');
   });
@@ -201,6 +205,14 @@ export function goToCard(problemId) {
     document.getElementById('card-3d').classList.remove('flipped');
     renderCard();
   }
+}
+
+export function openDeck(filter) {
+  fcFilter = filter;
+  fcIdx = 0;
+  buildDeck();
+  // Signal main.js to switch to flashcards view
+  document.dispatchEvent(new CustomEvent('open-deck'));
 }
 
 export function shuffleDeck() {
@@ -216,15 +228,19 @@ export function shuffleDeck() {
 // ── Init ───────────────────────────────────────────────────────────────────
 
 export function initFlashcards() {
-  document.getElementById('fc-filters').addEventListener('click', e => {
-    const btn = e.target.closest('.filter-btn');
-    if (!btn) return;
-    fcFilter = btn.dataset.fc;
-    document.querySelectorAll('#fc-filters .filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    fcIdx = 0;
-    buildDeck();
-  });
+  // fc-filters may not exist when sidebar is active — guard to avoid crash
+  const filterBar = document.getElementById('fc-filters');
+  if (filterBar) {
+    filterBar.addEventListener('click', e => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      fcFilter = btn.dataset.fc;
+      filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      fcIdx = 0;
+      buildDeck();
+    });
+  }
 
   document.getElementById('btn-prev').addEventListener('click', prevCard);
   document.getElementById('btn-next').addEventListener('click', nextCard);

@@ -136,14 +136,25 @@ body {
 .filter-btn:hover  { border-color: var(--text-faint); }
 .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
 
-.view { display: none; padding: 28px 28px 60px; max-width: 980px; margin: 0 auto; }
+.view { display: none; padding: 28px 28px 32px; }
 .view.active { display: block; }
 
-footer {
+#main-panel {
+  flex: 1;
+  overflow-x: hidden;
+  min-width: 0;          /* prevent flex child blowout */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Footer lives inside #main-panel — does NOT span the sidebar */
+#main-panel footer {
   text-align: center;
   font-size: 11px;
   color: var(--text-faint);
-  padding: 20px 0 40px;
+  padding: 16px 0 32px;
+  border-top: 1px solid var(--border);
+  margin-top: auto;      /* push to bottom when content is short */
 }
 
 @media (max-width: 640px) {

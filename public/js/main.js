@@ -1,5 +1,6 @@
 import { loadState, onProgressChange } from './state.js';
-import { initTracker, renderTracker } from './tracker.js';
+import { initDashboard, renderDashboard } from './dashboard.js';
+import { initSidebar, renderSidebar } from './sidebar.js';
 import { initFlashcards, buildDeck, flipCard, nextCard, prevCard, goToCard } from './flashcards.js';
 
 // ── Theme ──────────────────────────────────────────────────────────────────
@@ -42,17 +43,33 @@ function moonIcon() {
   </svg>`;
 }
 
-// ── Nav ────────────────────────────────────────────────────────────────────
+// ── View switching ─────────────────────────────────────────────────────────
+
+function switchView(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + viewId)?.classList.add('active');
+  document.querySelector(`.nav-tab[data-view="${viewId}"]`)?.classList.add('active');
+}
 
 function initNav() {
   document.querySelectorAll('.nav-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const view = btn.dataset.view;
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-      document.getElementById('view-' + view).classList.add('active');
-      btn.classList.add('active');
-    });
+    btn.addEventListener('click', () => switchView(btn.dataset.view));
+  });
+}
+
+// ── Cross-module events ────────────────────────────────────────────────────
+
+function initEvents() {
+  // Sidebar item or tracker click → open flashcard view at that card
+  document.addEventListener('open-flashcard', e => {
+    switchView('flashcards');
+    goToCard(e.detail.id);
+  });
+
+  // Jump-in button in dashboard → open flashcard with filter already set
+  document.addEventListener('open-deck', () => {
+    switchView('flashcards');
   });
 }
 
@@ -67,32 +84,11 @@ function initKeyboard() {
   });
 }
 
-// ── Reset ──────────────────────────────────────────────────────────────────
-
-function initReset() {
-  document.getElementById('reset-btn').addEventListener('click', async () => {
-    if (!confirm('Reset all progress? This clears every stage and review mark.')) return;
-    const { resetProgress } = await import('./state.js');
-    resetProgress();
-  });
-}
-
-// ── Tracker → Flashcard jump ───────────────────────────────────────────────
-
-function initOpenFlashcard() {
-  document.addEventListener('open-flashcard', e => {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-    document.getElementById('view-flashcards').classList.add('active');
-    document.querySelector('.nav-tab[data-view="flashcards"]').classList.add('active');
-    goToCard(e.detail.id);
-  });
-}
-
 // ── Render all ─────────────────────────────────────────────────────────────
 
 function renderAll() {
-  renderTracker();
+  renderDashboard();
+  renderSidebar();
   buildDeck();
 }
 
@@ -109,10 +105,10 @@ async function init() {
   initTheme();
   initNav();
   initKeyboard();
-  initReset();
-  initTracker();
+  initEvents();
+  initDashboard();
+  initSidebar();
   initFlashcards();
-  initOpenFlashcard();
 
   onProgressChange(renderAll);
 

@@ -1,0 +1,323 @@
+/* ── Stat cards ───────────────────────────────────────────────────────────── */
+
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.stat {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  transition: background .2s, border-color .2s;
+}
+
+.stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text-faint);
+  margin: 0 0 4px;
+}
+
+.stat-val {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: var(--mono);
+  margin: 0 0 2px;
+  line-height: 1.1;
+}
+
+.stat-sub {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin: 0 0 8px;
+}
+
+.stat-bar {
+  height: 3px;
+  background: var(--panel-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width .4s ease;
+}
+
+/* ── Shared panel card ────────────────────────────────────────────────────── */
+
+.dash-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: background .2s, border-color .2s;
+}
+
+/* ── Section title ────────────────────────────────────────────────────────── */
+
+.dash-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-faint);
+  margin: 0 0 14px;
+}
+
+.dash-section-title--gap {
+  margin-top: 22px;
+}
+
+/* ── Hero row: Overall progress + Jump In ─────────────────────────────────── */
+
+.dash-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* Overall progress inner layout: ring (left) + legend (right) */
+.dash-overall-body {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.dash-ring svg { display: block; }
+
+.dash-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dash-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.dash-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Jump-in buttons ──────────────────────────────────────────────────────── */
+
+.dash-jumpin-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dash-jbtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-family: var(--sans);
+  cursor: pointer;
+  transition: border-color .12s, background .12s, color .12s;
+  text-align: left;
+  width: 100%;
+}
+.dash-jbtn:hover {
+  border-color: var(--text-faint);
+  color: var(--text);
+  background: var(--border);
+}
+
+.jbtn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.jbtn-label { flex: 1; }
+
+.jbtn-count {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+
+/* ── Bottom 2-column grid ─────────────────────────────────────────────────── */
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: stretch;
+  height: 420px;         /* fixed height → both panels always equal */
+}
+
+.dash-grid .dash-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;          /* fill the grid row exactly */
+  overflow: hidden;      /* contain scrollable children */
+}
+
+/* Pattern list fills remaining panel space and scrolls */
+#dash-patterns {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+#dash-patterns::-webkit-scrollbar       { width: 3px; }
+#dash-patterns::-webkit-scrollbar-track { background: transparent; }
+#dash-patterns::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Right panel inner content scrolls if it ever overflows */
+.dash-grid .dash-panel:last-child {
+  overflow-y: auto;
+}
+
+/* ── Pattern bars ─────────────────────────────────────────────────────────── */
+
+.dash-pat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.dash-pat-name {
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 130px;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-pat-bar-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dash-pat-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--panel-2);
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+  min-width: 0;
+}
+
+.dash-pat-nums {
+  font-size: 10px;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  min-width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── Difficulty bars ──────────────────────────────────────────────────────── */
+
+.dash-diff-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dash-diff-label {
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 52px;
+  flex-shrink: 0;
+}
+
+/* ── Next to focus ────────────────────────────────────────────────────────── */
+
+.dash-focus-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dash-focus-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.dash-focus-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.dash-focus-done {
+  font-size: 12px;
+  color: var(--green);
+}
+
+/* ── Reset ────────────────────────────────────────────────────────────────── */
+
+.dash-reset {
+  font-size: 11px;
+  color: var(--text-faint);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+  font-family: var(--sans);
+  margin-top: 14px;
+  display: block;
+}
+.dash-reset:hover { color: var(--red); }
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 860px) {
+  .dash-hero { grid-template-columns: 1fr; }
+  /* Single column: release fixed height so each panel is natural height */
+  .dash-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .dash-grid .dash-panel {
+    height: auto;
+    max-height: 400px;   /* still cap + scroll on mobile */
+  }
+}
+
+@media (max-width: 640px) {
+  .dash-stats     { grid-template-columns: repeat(2, 1fr); }
+  .dash-pat-name  { min-width: 90px; max-width: 90px; }
+}

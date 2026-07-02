@@ -1,14 +1,16 @@
-const CACHE = 'dsa-drills-v3';
+const CACHE = 'dsa-drills-v4';
 
 const PRECACHE = [
   '/',
   '/styles/base.css',
   '/styles/nav.css',
-  '/styles/tracker.css',
+  '/styles/sidebar.css',
+  '/styles/dashboard.css',
   '/styles/flashcards.css',
   '/js/main.js',
   '/js/state.js',
-  '/js/tracker.js',
+  '/js/sidebar.js',
+  '/js/dashboard.js',
   '/js/flashcards.js',
   '/problems.json',
   '/exercise-filenames.json',
